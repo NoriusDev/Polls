@@ -1,0 +1,18 @@
+database:
+  # mariadb or mysql
+  type: mariadb
+  username: "root"
+  password: ""
+  host: "localhost"
+  database: ""
+  port: "3306"
+
+settings:
+
+
+language:
+  commands:
+    poll:
+      usage: "<red>Please use: /poll <close|remove> <pollId>"
+      no-player: "<red>You have to be a player to use this command!"
+      no-number: "<red>Bitte gib eine valide Zahl an!"

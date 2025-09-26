@@ -1,0 +1,17 @@
+name: Polls
+version: '1.0'
+main: net.norius.polls.Polls
+api-version: '1.21'
+authors: [ Norius ]
+description: Create Custom Polls
+
+permissions:
+  polls.createpoll:
+    description: ""
+
+commands:
+  createpoll:
+    description: ""
+    permission: "polls.createpoll"
+  poll:
+    description: ""
