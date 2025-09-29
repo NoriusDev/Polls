@@ -1,5 +1,7 @@
 package net.norius.polls.poll;
 
+import net.norius.polls.poll.enums.ChoiceAnswer;
+
 import java.sql.Timestamp;
 import java.util.UUID;
 

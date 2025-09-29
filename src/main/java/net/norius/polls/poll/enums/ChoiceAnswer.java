@@ -1,4 +1,4 @@
-package net.norius.polls.poll;
+package net.norius.polls.poll.enums;
 
 public enum ChoiceAnswer {
 

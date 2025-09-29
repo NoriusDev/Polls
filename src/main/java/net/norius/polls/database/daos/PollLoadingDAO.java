@@ -1,8 +1,8 @@
 package net.norius.polls.database.daos;
 
 import net.norius.polls.Polls;
-import net.norius.polls.poll.AnswerType;
-import net.norius.polls.poll.ChoiceAnswer;
+import net.norius.polls.poll.enums.AnswerType;
+import net.norius.polls.poll.enums.ChoiceAnswer;
 import net.norius.polls.poll.Poll;
 import net.norius.polls.poll.PollVote;
 
@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 
 public record PollLoadingDAO(Polls plugin) {
 
-    public CompletableFuture<Map<Long, Poll>> loadActivePolls() {
+    public CompletableFuture<Map<Long, Poll>> loadPolls() {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = plugin.getDatabase().getConnection();
-                 PreparedStatement statement = connection.prepareStatement("SELECT * FROM polls_polls WHERE is_active = True");
+                 PreparedStatement statement = connection.prepareStatement("SELECT * FROM polls_polls");
                  ResultSet resultSet = statement.executeQuery()) {
 
                 Map<Long, Poll> polls = new HashMap<>();
@@ -31,6 +31,26 @@ public record PollLoadingDAO(Polls plugin) {
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to load active polls!", e);
+            }
+
+            return null;
+        }, plugin.getDatabase().getExecutor());
+    }
+
+    public CompletableFuture<Long> loadLastPollId() {
+        return CompletableFuture.supplyAsync(() -> {
+            try(Connection connection = plugin.getDatabase().getConnection();
+                PreparedStatement statement = connection.prepareStatement("SELECT last_poll_id FROM polls_id WHERE id = 1");
+                ResultSet results = statement.executeQuery()) {
+
+                if(results.next()) {
+                    return results.getLong("last_poll_id");
+                } else {
+                    return 1L;
+                }
+
+            } catch (SQLException e) {
+                plugin.getLogger().log(Level.SEVERE, "Failed to load last poll id!", e);
             }
 
             return null;

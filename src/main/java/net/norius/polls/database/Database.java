@@ -26,21 +26,21 @@ public class Database {
 
         HikariConfig config = new HikariConfig();
 
-        String type = plugin.getConfigLoader().getString("database.type");
-        String host = plugin.getConfigLoader().getString("database.host");
-        String port = plugin.getConfigLoader().getString("database.port");
-        String database = plugin.getConfigLoader().getString("database.database");
-        String user = plugin.getConfigLoader().getString("database.user");
+        String type = plugin.getConfig().getString("database.type");
+        String host = plugin.getConfig().getString("database.host");
+        String port = plugin.getConfig().getString("database.port");
+        String database = plugin.getConfig().getString("database.database");
+        String user = plugin.getConfig().getString("database.user");
 
         if(type.isEmpty() || host.isEmpty() || port.isEmpty() || database.isEmpty() || user.isEmpty()) {
-            plugin.getLogger().warning("Database type and host or port are mandatory");
+            plugin.getLogger().warning("Database type and host or port are mandatory! Disabling...");
             Bukkit.getPluginManager().disablePlugin(plugin);
             return;
         }
 
         config.setJdbcUrl(String.format("jdbc:%s://%s:%s/%s",  type, host, port, database));
-        config.setUsername(plugin.getConfigLoader().getString("database.username"));
-        config.setPassword(plugin.getConfigLoader().getString("database.password"));
+        config.setUsername(user);
+        config.setPassword(plugin.getConfig().getString("database.password"));
 
         dataSource = new HikariDataSource(config);
         executor = Executors.newCachedThreadPool();
@@ -50,31 +50,33 @@ public class Database {
         return CompletableFuture.runAsync(() -> {
             try(Connection connection = getConnection();
                 PreparedStatement polls = connection.prepareStatement("CREATE TABLE IF NOT EXISTS polls_polls(" +
-                        "poll_id LONG NOT NULL PRIMARY KEY, " +
+                        "poll_id BIGINT NOT NULL PRIMARY KEY, " +
                         "question_text VARCHAR(255) NOT NULL, " +
-                        "answer_type VARCHAR(20) NOT NULL CHECK (poll_type IN ('YES_NO', 'MULTIPLE_CHOICE')), " +
-                        "created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, " +
-                        "poll_duration LONG NOT NULL, " +
+                        "answer_type VARCHAR(20) NOT NULL, " +
+                        "created_at TIMESTAMP, " +
+                        "poll_duration BIGINT NOT NULL, " +
                         "is_active BOOLEAN, " +
                         "poll_creator VARCHAR(36) NOT NULL)");
                 PreparedStatement votes = connection.prepareStatement("CREATE TABLE IF NOT EXISTS polls_votes(" +
-                        "poll_id LONG NOT NULL, " +
+                        "poll_id BIGINT NOT NULL, " +
                         "choice_order INT, " +
-                        "user_id VARCHAR(36) NOT NULL), " +
-                        "choice_answer VARCHAR(3) CHECK (choice_answer IN ('YES', 'NO'))," +
-                        "voted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, " +
-                        "FOREIGN KEY (poll_id) REFERENCES polls_polls(poll_id) ON DELETE CASCADE, " +
-                        "UNIQUE (poll_id, user_id))");
+                        "user_id VARCHAR(36) NOT NULL, " +
+                        "choice_answer VARCHAR(3)," +
+                        "voted_at TIMESTAMP, " +
+                        "FOREIGN KEY (poll_id) REFERENCES polls_polls(poll_id) ON DELETE CASCADE)");
                 PreparedStatement choices = connection.prepareStatement("CREATE TABLE IF NOT EXISTS polls_choices(" +
-                        "poll_id LONG NOT NULL, " +
+                        "poll_id BIGINT NOT NULL, " +
                         "choice_order INT NOT NULL, " +
                         "choice_text VARCHAR(100) NOT NULL, " +
-                        "FOREIGN KEY (poll_id) REFERENCES polls_polls(poll_id) ON DELETE CASCADE, " +
-                        "UNIQUE (poll_id, choice_order)")) {
+                        "FOREIGN KEY (poll_id) REFERENCES polls_polls(poll_id) ON DELETE CASCADE)");
+                PreparedStatement pollId = connection.prepareStatement("CREATE TABLE IF NOT EXISTS polls_id(" +
+                        "id INT PRIMARY KEY, " +
+                        "last_poll_id BIGINT NOT NULL)")) {
 
                 polls.execute();
                 votes.execute();
                 choices.execute();
+                pollId.execute();
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.WARNING, "Failed to create database tables!", e);

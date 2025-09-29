@@ -1,18 +1,151 @@
 database:
   # mariadb or mysql
-  type: mariadb
-  username: "root"
+  type: mysql
+  user: "root"
   password: ""
   host: "localhost"
   database: ""
   port: "3306"
 
 settings:
-
+  poll-deletion-ms: 10800000 # 3 hours
+  broadcast-on-poll-creation: true
+  broadcast-on-poll-ending: true
 
 language:
+  general:
+    no-perms: "<red>You don't have permission to execute this command!"
+    no-player: "<red>You must be a player to use this command!"
+  broadcast:
+    creation: "<b><blue>Polls <reset><dark_gray>» <green>The poll <yellow>%question%<gray>has been published. <click:run_command:'/poll'><dark_gray>[<aqua>View polls<dark_gray>]</click>"
+    ended: "<b><blue>Polls <reset><dark_gray>» <gray>The poll <yellow>%question%<gray>has ended. <click:run_command:'/endedpolls'><dark_gray>[<aqua>View ended polls<dark_gray>]</click>"
   commands:
     poll:
-      usage: "<red>Please use: /poll <close|remove> <pollId>"
-      no-player: "<red>You have to be a player to use this command!"
-      no-number: "<red>Bitte gib eine valide Zahl an!"
+      usage: "<red>Usage: /poll <close|remove> <pollId>"
+      no-number: "<red>Please enter a valid number!"
+      invalid-number: "<red>No poll exists with this ID!"
+      already-closed: "<red>This poll is no longer active!"
+      closed: "<gray>You have <green>successfully <gray>closed the poll <aqua>%id%<gray>."
+      removed: "<gray>You have <green>successfully <gray>removed the poll <aqua>%id%<gray>."
+    createpoll:
+      usage: "<red>Usage: /createpoll <duration> <question>"
+      invalid-format: "<red>Please enter a time in the format 1s, 1h, 1d, 1w!"
+      no-answer-type: "<red>Please select an answer type to create the poll!"
+      max-answers: "<red>You can add a maximum of 6 answer options!"
+      created: "<gray>You have <green>successfully <gray>created a new <aqua>poll<gray>."
+  gui:
+    duration:
+      seconds: "s"
+      minutes: "m"
+      hours: "h"
+      days: "d"
+      weeks: "w"
+      ended: "<red>Poll ended"
+    date-format: "dd.MM hh:mm a"
+    create-poll-menu:
+      title: "Select an Answer Type"
+      not-selected: "<red>Not selected yet"
+      confirm:
+        name: "<green>Create Poll"
+        lore:
+          - "<dark_gray>Click to create the poll"
+          - ""
+          - "<dark_gray>» <white>Question: <aqua>%question%"
+          - "<dark_gray>» <white>Duration: <aqua>%duration%"
+          - "<dark_gray>» <white>Answer Type: <aqua>%answer-type%"
+      yes-no:
+        name: "<green>Yes <dark_gray>/ <red>No"
+        lore:
+          - "<dark_gray>Click to set the answer type to Yes/No"
+      multiple-choices:
+        name: "<yellow>Multiple Choices"
+        lore:
+          - "<dark_gray>Click to add multiple answer options"
+      selected-lore:
+        - ""
+        - "  <green>🗸 Selected"
+    set-choice-menu:
+      title: "Edit Answer Options"
+      answer-choice:
+        name: "%number%. <yellow>%text%"
+        lore:
+          - "<dark_gray>Click to remove"
+      back:
+        name: "<green>Save"
+        lore:
+          - "<dark_gray>Click to go back"
+      add:
+        name: "<green>Add Answer"
+        lore:
+          - "<dark_gray>Click to add a new answer option"
+        anvil-title: "Enter Answer"
+        anvil-text: "Enter here"
+        anvil-invalid: "Invalid!"
+    active-polls-menu:
+      title: "Active Polls"
+      already-voted: "<red>You have already voted in this poll!"
+      poll:
+        name: "<yellow>%question%"
+        lore:
+          - "<dark_gray>ID: %poll-id%"
+          - ""
+          - "<dark_gray>» <white>Ends: <aqua>%duration%"
+          - "<dark_gray>» <white>Created on: <aqua>%creation-date% o'clock"
+        voted-lore:
+          - "  <green>🗸 Voted"
+        not-voted-lore:
+          - "<dark_gray>Click to participate in this poll"
+    poll-vote-menu:
+      title: "Select an Answer"
+      voted: "<gray>You have <green>successfully <gray>voted for <yellow>%answer%<gray>."
+      question:
+        name: "<yellow>%question%"
+        lore:
+          - "<dark_gray>Select an answer option"
+          - ""
+          - "<red>You can only vote once!"
+      multiple-choice:
+        name: "%number%. <green>%answer%"
+        lore:
+          - "<dark_gray>Click to vote"
+      vote-yes:
+        name: "<green>Yes"
+        lore:
+          - "<dark_gray>Click to vote"
+      vote-no:
+        name: "<red>No"
+        lore:
+          - "<dark_gray>Click to vote"
+      back:
+        name: "<red>Back"
+        lore:
+          - "<dark_gray>Click to go back"
+    ended-polls-menu:
+      title: "Ended Polls"
+      poll:
+        name: "<yellow>%question%"
+        lore:
+          - "<dark_gray>ID: %poll-id%"
+          - "<dark_gray>Click to view results"
+          - ""
+          - "<dark_gray>» <white>Ended on: <aqua>%ending-date% o'clock"
+          - "<dark_gray>» <white>Created by: <aqua>%creator%"
+    poll-results-menu:
+      title: "Poll Results"
+      question:
+        name: "<yellow>%question%"
+        no-winner-lore:
+          - ""
+          - "<gray>There is no answer with the most votes!"
+        lore:
+          - ""
+          - "<white>The most votes went to:"
+          - "<yellow>%answer% <dark_gray>(<green>%percent%%<dark_gray>)"
+      result:
+        name: "<yellow>%answer% <dark_gray>(<green>%percent%%<dark_gray>)"
+        voter: "<aqua>%player% <gray>at <aqua>%vote-date% o'clock"
+        no-votes-lore:
+          - "<gray>No votes"
+        lore:
+          - "<dark_gray>Here you can see all players who voted:"
+          - ""

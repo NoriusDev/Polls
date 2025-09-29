@@ -7,11 +7,20 @@ description: Create Custom Polls
 
 permissions:
   polls.createpoll:
-    description: ""
+    description: "Allows creating a poll"
+  polls.remove:
+    description: "Allows removing a poll"
+  polls.close:
+    description: "Allows closing a poll"
+  polls.ended:
+    description: "Allows viewing the ended polls"
 
 commands:
   createpoll:
-    description: ""
+    description: "Creates a poll"
     permission: "polls.createpoll"
   poll:
-    description: ""
+    description: "Opens a menu where you can find active polls"
+  endedpolls:
+    description: "Shows the ended polls"
+    permission: "polls.ended"
