@@ -53,11 +53,10 @@ public class ResultsCalculator {
                 .map(Map.Entry::getKey)
                 .toList();
 
-        Integer winner = topAnswers.getFirst();
         boolean tie = topAnswers.size() > 1;
 
-        if(tie) return -1;
-        return winner;
+        if(tie || topAnswers.isEmpty()) return -1;
+        return topAnswers.getFirst();
     }
 
     public static Double calculateVotingPercent(Poll poll, ChoiceAnswer choiceAnswer, int choiceIndex) {

@@ -169,7 +169,7 @@ public class PollSavingDAO {
         statement.setLong(1, pollId);
         statement.setInt(2, pollVote.multipleChoiceAnswer());
         statement.setString(3, pollVote.userId().toString());
-        statement.setString(4, pollVote.choiceAnswer().name());
+        statement.setString(4, pollVote.choiceAnswer() == null ? null : pollVote.choiceAnswer().name());
         statement.setTimestamp(5, pollVote.votedAt());
     }
 }
