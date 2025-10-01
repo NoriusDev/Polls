@@ -1,6 +1,6 @@
 database:
-  # mariadb or mysql
-  type: mysql
+  # sqlite, mysql or mariadb (driver is needed for mariadb)
+  type: sqlite
   user: "root"
   password: ""
   host: "localhost"
@@ -17,7 +17,7 @@ language:
     no-perms: "<red>You don't have permission to execute this command!"
     no-player: "<red>You must be a player to use this command!"
   broadcast:
-    creation: "<b><blue>Polls <reset><dark_gray>» <green>The poll <yellow>%question%<gray>has been published. <click:run_command:'/poll'><dark_gray>[<aqua>View polls<dark_gray>]</click>"
+    creation: "<b><blue>Polls <reset><dark_gray>» <green>The poll <yellow>%question%<gray>has been published. <click:run_command:'/poll'><dark_gray>[<aqua>View running polls<dark_gray>]</click>"
     ended: "<b><blue>Polls <reset><dark_gray>» <gray>The poll <yellow>%question%<gray>has ended. <click:run_command:'/endedpolls'><dark_gray>[<aqua>View ended polls<dark_gray>]</click>"
   commands:
     poll:

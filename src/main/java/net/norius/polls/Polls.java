@@ -33,8 +33,8 @@ public final class Polls extends JavaPlugin {
         pollManager = new PollManager(this);
 
         database.createTables()
-                .thenRun(() -> pollManager.loadLastPollId())
-                .thenRun(() -> pollManager.loadActivePolls());
+                .thenCompose(v -> pollManager.loadLastPollId())
+                .thenCompose(v -> pollManager.loadActivePolls());
 
         new PollTask(this);
 
@@ -45,7 +45,7 @@ public final class Polls extends JavaPlugin {
     public void onDisable() {
         isDisabling = true;
         if(database != null && !database.getExecutor().isShutdown()) {
-            pollManager.saveActivePolls().thenRun(() -> database.getExecutor().shutdownNow());
+            pollManager.saveActivePolls().thenRun(() -> database.getExecutor().shutdown());
         }
     }
 

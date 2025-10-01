@@ -31,9 +31,8 @@ public record PollLoadingDAO(Polls plugin) {
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to load active polls!", e);
+                return Collections.emptyMap();
             }
-
-            return null;
         }, plugin.getDatabase().getExecutor());
     }
 
@@ -46,14 +45,13 @@ public record PollLoadingDAO(Polls plugin) {
                 if(results.next()) {
                     return results.getLong("last_poll_id");
                 } else {
-                    return 1L;
+                    return 0L;
                 }
 
             } catch (SQLException e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to load last poll id!", e);
+                return 0L;
             }
-
-            return null;
         }, plugin.getDatabase().getExecutor());
     }
 
@@ -63,7 +61,7 @@ public record PollLoadingDAO(Polls plugin) {
                 AnswerType.valueOf(resultSet.getString("answer_type")),
                 loadMultipleChoices(connection, pollId),
                 loadPollVotes(connection, pollId),
-                resultSet.getTimestamp("created_at"),
+                new Timestamp(resultSet.getLong("created_at")),
                 new Timestamp(System.currentTimeMillis() + resultSet.getLong("poll_duration")),
                 resultSet.getBoolean("is_active"),
                 UUID.fromString(resultSet.getString("poll_creator"))
@@ -102,7 +100,7 @@ public record PollLoadingDAO(Polls plugin) {
                     pollVotes.add(new PollVote(
                             UUID.fromString(resultSet.getString("user_id")),
                             ChoiceAnswer.valueOf(resultSet.getString("choice_answer")),
-                            resultSet.getTimestamp("voted_at"),
+                            new Timestamp(resultSet.getLong("voted_at")),
                             resultSet.getInt("choice_order")
                     ));
                 }

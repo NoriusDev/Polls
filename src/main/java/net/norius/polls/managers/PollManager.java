@@ -37,8 +37,8 @@ public class PollManager {
         this.plugin = plugin;
     }
 
-    public void loadActivePolls() {
-        pollLoadingDAO.loadPolls().thenAcceptAsync(polls::putAll);
+    public CompletableFuture<Void> loadActivePolls() {
+        return pollLoadingDAO.loadPolls().thenAcceptAsync(polls::putAll);
     }
 
     public CompletableFuture<Void> saveActivePolls() {
@@ -55,8 +55,8 @@ public class PollManager {
         return Optional.ofNullable(polls.get(id));
     }
 
-    public void loadLastPollId() {
-        pollLoadingDAO.loadLastPollId().thenAcceptAsync(this.lastPollId::set);
+    public CompletableFuture<Void> loadLastPollId() {
+        return pollLoadingDAO.loadLastPollId().thenAcceptAsync(this.lastPollId::set);
     }
 
     public LinkedHashMap<Long, Poll> getSortedPolls(boolean active) {
@@ -89,7 +89,7 @@ public class PollManager {
                 creator
         );
 
-        long pollId = this.lastPollId.getAndIncrement();
+        long pollId = this.lastPollId.incrementAndGet();
 
         polls.put(pollId, poll);
         pollSavingDAO.savePoll(pollId, poll);

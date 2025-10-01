@@ -10,11 +10,11 @@ public class DurationFormatter {
     public static Component format(Timestamp timestamp, Polls plugin) {
         long millis = timestamp.getTime() - System.currentTimeMillis();
 
-        if(millis <= 0) {
+        long seconds = millis / 1000;
+
+        if(seconds <= 0) {
             return plugin.getConfigLoader().get("gui.duration.ended");
         }
-
-        long seconds = millis / 1000;
 
         long weeks = seconds / (7 * 24 * 60 * 60);
         seconds %= (7 * 24 * 60 * 60);

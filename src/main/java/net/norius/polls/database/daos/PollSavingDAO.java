@@ -1,6 +1,5 @@
 package net.norius.polls.database.daos;
 
-import lombok.RequiredArgsConstructor;
 import net.norius.polls.Polls;
 import net.norius.polls.poll.Poll;
 import net.norius.polls.poll.PollVote;
@@ -14,15 +13,26 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
-@RequiredArgsConstructor
 public class PollSavingDAO {
 
     private final Polls plugin;
-    private final String voteSql = "INSERT INTO polls_votes(poll_id, choice_order, user_id, choice_answer, voted_at) " +
-            "VALUES (?, ?, ?, ?, ?) " +
-            "ON DUPLICATE KEY UPDATE " +
-            "choice_answer = VALUES(choice_answer), " +
-            "voted_at = VALUES(voted_at)";
+    private final String voteSql;
+
+    public PollSavingDAO(Polls plugin) {
+        this.plugin = plugin;
+        this.voteSql = plugin.getDatabase().isSqlite() ?
+                "INSERT INTO polls_votes (poll_id, choice_order, user_id, choice_answer, voted_at) " +
+                        "VALUES (?, ?, ?, ?, ?) " +
+                        "ON CONFLICT(poll_id, user_id) DO UPDATE SET " +
+                        "choice_order = excluded.choice_order, " +
+                        "choice_answer = excluded.choice_answer, " +
+                        "voted_at = excluded.voted_at" :
+                "INSERT INTO polls_votes(poll_id, choice_order, user_id, choice_answer, voted_at) " +
+                        "VALUES (?, ?, ?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "choice_answer = VALUES(choice_answer), " +
+                        "voted_at = VALUES(voted_at)";
+    }
 
     public CompletableFuture<Void> saveActivePolls(Set<Map.Entry<Long, Poll>> activePolls) {
         return CompletableFuture.runAsync(() -> {
@@ -49,7 +59,10 @@ public class PollSavingDAO {
     public void saveLastPollId(long id) {
         CompletableFuture.runAsync(() -> {
             try (Connection connection = plugin.getDatabase().getConnection();
-                 PreparedStatement statement = connection.prepareStatement(
+                 PreparedStatement statement = connection.prepareStatement(plugin.getDatabase().isSqlite() ?
+                         "INSERT INTO polls_id (id, last_poll_id) " +
+                                 "VALUES (1, ?) " +
+                                 "ON CONFLICT(id) DO UPDATE SET last_poll_id = excluded.last_poll_id" :
                          "INSERT INTO polls_id (id, last_poll_id) VALUES (1, ?)" +
                                  "ON DUPLICATE KEY UPDATE last_poll_id = VALUES(last_poll_id);")) {
                 statement.setLong(1, id);
@@ -63,7 +76,16 @@ public class PollSavingDAO {
     public void savePoll(long pollId, Poll poll) {
         CompletableFuture.runAsync(() -> {
             try (Connection connection = plugin.getDatabase().getConnection();
-                 PreparedStatement statement = connection.prepareStatement(
+                 PreparedStatement statement = connection.prepareStatement(plugin.getDatabase().isSqlite() ?
+                         "INSERT INTO polls_polls (poll_id, question_text, answer_type, created_at, poll_duration, is_active, poll_creator) " +
+                                 "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                                 "ON CONFLICT(poll_id) DO UPDATE SET " +
+                                 "question_text = excluded.question_text, " +
+                                 "answer_type = excluded.answer_type, " +
+                                 "created_at = excluded.created_at, " +
+                                 "poll_duration = excluded.poll_duration, " +
+                                 "is_active = excluded.is_active, " +
+                                 "poll_creator = excluded.poll_creator" :
                          "INSERT INTO polls_polls(poll_id, question_text, answer_type, created_at, poll_duration, is_active, poll_creator) " +
                                  "VALUES (?, ?, ?, ?, ?, ?, ?) " +
                                  "ON DUPLICATE KEY UPDATE " +
@@ -80,7 +102,7 @@ public class PollSavingDAO {
                     statement.setLong(1, pollId);
                     statement.setString(2, poll.getQuestion());
                     statement.setString(3, poll.getAnswerType().name());
-                    statement.setTimestamp(4, poll.getCreatedAt());
+                    statement.setLong(4, poll.getCreatedAt().getTime());
                     statement.setLong(5, poll.getEndingAt().getTime() - System.currentTimeMillis());
                     statement.setBoolean(6, poll.isActive());
                     statement.setString(7, poll.getCreator().toString());
@@ -170,6 +192,6 @@ public class PollSavingDAO {
         statement.setInt(2, pollVote.multipleChoiceAnswer());
         statement.setString(3, pollVote.userId().toString());
         statement.setString(4, pollVote.choiceAnswer() == null ? null : pollVote.choiceAnswer().name());
-        statement.setTimestamp(5, pollVote.votedAt());
+        statement.setLong(5, pollVote.votedAt().getTime());
     }
 }

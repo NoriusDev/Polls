@@ -1,6 +1,5 @@
 package net.norius.polls.utils;
 
-import net.kyori.adventure.text.Component;
 import net.norius.polls.Polls;
 import net.norius.polls.poll.Poll;
 import org.bukkit.Bukkit;
